@@ -119,7 +119,7 @@ def generate_example_commands(nmap_output, ctf_ip):
                 hostnames.append(line.split("http-title: Did not follow redirect to http://")[1])
         for hostname in hostnames:
             example_commands.append(f"echo '{ctf_ip} {hostname}' | sudo tee -a /etc/hosts")
-            print(f"[*] Found hostname: {ctf_ip} {hostname}")
+            # print(f"[*] Found hostname: {ctf_ip} {hostname}")
     # If a web port is open, suggest gobuster and nikto
     if "http" in nmap_output or "https" in nmap_output:
         example_commands.append(f"\n[+] Found web ports, suggest running gobuster and nikto:")
@@ -129,7 +129,7 @@ def generate_example_commands(nmap_output, ctf_ip):
     # If an ssh port is open, suggest hydra
     if "ssh" in nmap_output:
         example_commands.append(f"\n[+] Found ssh port, suggest running hydra:")
-        example_commands.append(f"hydra -l <USER> -P /usr/share/wordlists/rockyou.txt ssh://{ctf_ip}:<PORT>")
+        example_commands.append(f"hydra -C /opt/SecLists/Passwords/Default-Credentials/ssh-betterdefaultpasslist.txt ssh://{ctf_ip}:<PORT>")
     # If an smb port is open, suggest enum4linux, smbclient, smbmap
     if "smb" or "445" in nmap_output:
         example_commands.append(f"\n[+] Found smb port, suggest running enum4linux, smbclient, smbmap:")
@@ -138,12 +138,14 @@ def generate_example_commands(nmap_output, ctf_ip):
         example_commands.append(f"smbmap -H {ctf_ip}")
     # If a mysql port is open, suggest mysql
     if "mysql" in nmap_output:
-        example_commands.append(f"\n[+] Found mysql port, suggest running mysql:")
+        example_commands.append(f"\n[+] Found mysql port, suggest running mysql and hydra for default passwords:")
         example_commands.append(f"mysql -h {ctf_ip} -u root -p")
-    # If a ftp port is open, suggest ftp
+        example_commands.append(f"hydra -C /opt/SecLists/Passwords/mysql-betterdefaultpasslist.txt mysql://{ctf_ip}")
+    # If a ftp port is open, suggest enumerating manuall with ftp and checking for default passwords with hydra
     if "ftp" in nmap_output:
         example_commands.append(f"\n[+] Found ftp port, suggest running ftp:")
         example_commands.append(f"ftp {ctf_ip}")
+        example_commands.append(f"hydra -C /opt/SecLists/Passwords/Default-Credentials/ftp-betterdefaultpasslist.txt ftp://{ctf_ip}")
     # If wordpress is detected, suggest wpscan
     if "wordpress" in nmap_output:
         example_commands.append(f"\n[+] Found wordpress, suggest running wpscan:")
